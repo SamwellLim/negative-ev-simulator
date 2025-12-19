@@ -1,4 +1,4 @@
-# Negative EV Gambling Simulator
+# Negative EV Gambling Simulator / Ruin theory investigation
 
 Investigation was done purely from my own curiosity. Which percentile groups of people would see profits under a negative EV game?
 Made with the help of Grok for scaffolding code to help with creating the react/js structure and some help with documentation. 
