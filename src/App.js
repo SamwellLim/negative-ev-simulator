@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend } from 'chart.js';
+import { Line, Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
 
 function App() {
   const [maxGames, setMaxGames] = useState(1000);        
@@ -10,6 +13,7 @@ function App() {
   const [flatBetAmount, setFlatBetAmount] = useState(5); 
   const [kellyFraction, setKellyFraction] = useState(20); 
   const [results, setResults] = useState(null);
+  const [selectedPIndex, setSelectedPIndex] = useState(0); // For histogram
 
   const simulatePlayer = (maxGames, p, strategy, flatAmount, kellyF, initialBankroll) => {
     let bankroll = initialBankroll;
@@ -33,7 +37,7 @@ function App() {
 
       const win = Math.random() < p;
       if (win) {
-        bankroll += bet; // Pays 2:1 → net +bet
+        bankroll += bet; 
       } else {
         bankroll -= bet;
       }
@@ -83,6 +87,7 @@ function App() {
         p90,
         p99,
         average,
+        finalBankrolls, // Store for histogram
       };
     });
 
@@ -110,6 +115,51 @@ function App() {
     if (strategy === 'bold') return 'Bold Play (Bet All)';
     if (strategy === 'flat') return `Flat $${flatBetAmount} Bet`;
     return `Kelly (${kellyFraction}% of bankroll)`;
+  };
+
+  // Histogram and Pareto functions
+  const getBins = (bankrolls) => {
+    const binEdges = [0, 10, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, Infinity];
+    const bins = new Array(binEdges.length - 1).fill(0);
+
+    bankrolls.forEach(b => {
+      for (let i = 0; i < binEdges.length - 1; i++) {
+        if (b >= binEdges[i] && b < binEdges[i + 1]) {
+          bins[i]++;
+          break;
+        }
+      }
+    });
+
+    const labels = binEdges.slice(0, -1).map((low, i) => {
+      const high = binEdges[i + 1] === Infinity ? '∞' : binEdges[i + 1] - 1;
+      return `${low}-${high}`;
+    });
+
+    return { labels, bins };
+  };
+
+  const fitParetoAndGenerate = (bankrolls, binLabels, totalPlayers) => {
+    const positive = bankrolls.filter(b => b > 0);
+    if (positive.length < 2) return new Array(binLabels.length).fill(0);
+
+    const xm = Math.min(...positive);
+    const n = positive.length;
+    const sumLog = positive.reduce((sum, x) => sum + Math.log(x / xm), 0);
+    const alpha = n / sumLog;
+
+    // Generate Pareto y for midpoints of bins (scaled to count)
+    const midPoints = binLabels.map(label => {
+      const [low, high] = label.split('-').map(Number);
+      return (low + (isNaN(high) ? low + 10000 : high)) / 2; // Approximate for infinity
+    });
+
+    const paretoY = midPoints.map(x => {
+      if (x < xm) return 0;
+      return alpha * Math.pow(xm, alpha) / Math.pow(x, alpha + 1) * totalPlayers; // PDF * n
+    });
+
+    return paretoY;
   };
 
   return (
@@ -163,18 +213,18 @@ function App() {
         </div>
 
         {strategy === 'flat' && (
-        <div style={{ marginTop: '15px' }}>
-          <label>Flat Bet Amount ($): </label>
-          <input
-            type="number"
-            value={flatBetAmount}
-            onChange={e => setFlatBetAmount(Math.max(1, parseInt(e.target.value) || 1))}
-            style={{ width: '120px', padding: '8px', marginLeft: '10px' }}
-          />
-          <span style={{ marginLeft: '10px', color: '#555' }}>
-            Current: ${flatBetAmount}
-          </span>
-        </div>
+          <div style={{ marginTop: '15px' }}>
+            <label>Flat Bet Amount ($): </label>
+            <input
+              type="number"
+              value={flatBetAmount}
+              onChange={e => setFlatBetAmount(Math.max(1, parseInt(e.target.value) || 1))}
+              style={{ width: '120px', padding: '8px', marginLeft: '10px' }}
+            />
+            <span style={{ marginLeft: '10px', color: '#555' }}>
+              Current: ${flatBetAmount}
+            </span>
+          </div>
         )}
 
         {strategy === 'kelly' && (
@@ -292,6 +342,66 @@ function App() {
             </div>
           </div>
 
+          <h3 style={{ marginTop: '60px' }}>4. Final Bankroll Distribution</h3>
+          <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+            <label style={{ fontWeight: 'bold' }}>
+              Win Probability (p): {results && results[selectedPIndex]?.p.toFixed(2)} 
+              {' '} (variance = {results && results[selectedPIndex]?.variance.toFixed(3)})
+            </label>
+            <div style={{ width: '80%', maxWidth: '600px', margin: '10px auto' }}>
+              <input
+                type="range"
+                min="0"
+                max={results ? results.length - 1 : 0}
+                value={selectedPIndex}
+                onChange={e => setSelectedPIndex(parseInt(e.target.value))}
+                style={{ width: '100%', height: '8px', borderRadius: '5px', background: '#d3d3d3', outline: 'none' }}
+              />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9em', color: '#555' }}>
+              <span>p = 0.01</span>
+              <span>p = 0.49</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+            <div style={{ width: '80%', maxWidth: '800px' }}>
+              <Bar
+                data={{
+                  labels: getBins(results[selectedPIndex].finalBankrolls).labels,
+                  datasets: [
+                    {
+                      type: 'bar',
+                      label: 'Player Count',
+                      data: getBins(results[selectedPIndex].finalBankrolls).bins,
+                      backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                      yAxisID: 'y',
+                    },
+                    {
+                      type: 'line',
+                      label: 'Pareto Fit',
+                      data: fitParetoAndGenerate(results[selectedPIndex].finalBankrolls, getBins(results[selectedPIndex].finalBankrolls).labels, playersPerP),
+                      borderColor: 'rgb(255, 99, 132)',
+                      borderWidth: 2,
+                      fill: false,
+                      tension: 0.1,
+                      yAxisID: 'y',
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: { position: 'top' },
+                  },
+                  scales: {
+                    x: { title: { display: true, text: 'Final Bankroll ($)' } },
+                    y: { title: { display: true, text: 'Count' }, min: 0 },
+                  },
+                }}
+              />
+            </div>
+          </div>
           <div style={{ marginTop: '40px', padding: '15px', backgroundColor: '#fff3e0', borderRadius: '8px' }}>
             <p><strong>Key Takeaway:</strong> Higher variance creates more short-term winners and spectacular top performers — especially with aggressive strategies — despite guaranteed long-term ruin.</p>
           </div>
