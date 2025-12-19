@@ -21,7 +21,7 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "homepage": "./"
+    "homepage": "https://SamwellLim.github.io/negative-ev-simulator/"
   },
   "eslintConfig": {
     "extends": [
