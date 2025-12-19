@@ -1,70 +1,58 @@
-# Getting Started with Create React App
+# Negative EV Gambling Simulator
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Investigation was done purely from my own curiosity. Which percentile groups of people would see profits under a negative EV game?
+Made with the help of Grok for scaffolding code to help with creating the react/js structure and some help with documentation. 
 
-## Available Scripts
+**Live Demo**: https://samwelllim.github.io/negative-ev-simulator/
 
-In the project directory, you can run:
+An interactive web app that simulates betting in **negative expected value (EV) games** — like most casino games or lotteries — to demonstrate powerful behavioral and mathematical truths:
 
-### `npm start`
+- Even in a losing game, **high variance creates many short-term winners**
+- **Aggressive betting strategies** (e.g., "bet it all") produce spectacular outliers
+- **Gambler's ruin**: Given enough time, **everyone goes broke** in a negative-EV game
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Built with React and Chart.js.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Key Features
 
-### `npm test`
+- Simulate 49 different win probabilities (p = 0.01 to 0.49 → always negative EV)
+- Compare three betting strategies:
+  - **Bold Play** (bet your entire bankroll each time)
+  - **Flat Bet** (fixed dollar amount per bet)
+  - **Kelly Criterion** (proportional betting — with adjustable fraction)
+- Toggle **"Simulate until ruin or 10× bankroll"** to see true long-term ruin probability (~100%)
+- Visualizations:
+  - Fraction of players ending ahead vs. win probability and variance
+  - Fraction ruined over time
+  - Final bankroll percentiles (median, top 10%, top 1%)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## What it looks like
 
-### `npm run build`
+![Kelly Criterion using 10% bet sizing](UI.png)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Why This Matters
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+This simulator illustrates why people are drawn to negative-EV games:
+- You only see the **visible winners** (survivorship bias)
+- High variance makes success feel possible
+- No strategy escapes eventual ruin in an unfair game
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Perfect for understanding gambling psychology, behavioral finance, and probability theory.
 
-### `npm run eject`
+## Tech Stack
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- React (Create React App)
+- Chart.js (via react-chartjs-2)
+- Deployed with GitHub Pages
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Credits
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+My math degree and **Grok AI**.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## License
 
-## Learn More
+MIT License — feel free to fork, modify, and use for education or personal projects.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Made with curiosity about probability, psychology, and why we keep playing losing games.
