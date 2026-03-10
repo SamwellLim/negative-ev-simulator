@@ -45,10 +45,6 @@ Perfect for understanding gambling psychology, behavioral finance, and probabili
 - Chart.js (via react-chartjs-2)
 - Deployed with GitHub Pages
 
-## Credits
-
-My math degree and **Grok AI**.
-
 ## License
 
 MIT License — feel free to fork, modify, and use for education or personal projects.
